@@ -1,10 +1,20 @@
+import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
 import client from "../network/api.js";
+import { AuthContext } from "../context/AuthContext.jsx";
 
-const SignUpPage = () => {
+const SignInPage = () => {
+  const { token } = useContext(AuthContext);
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (token) {
+      navigate("/", { replace: true });
+    }
+  }, [token]);
 
   const [passwordConfirmError, setPasswordConfirmError] = useState(false);
   const [errorUI, setErrorUI] = useState({});
@@ -27,7 +37,7 @@ const SignUpPage = () => {
     try {
       const response = await client.post("/register", formData);
 
-      navigate("/signin");
+      navigate("/signin", { replace: true });
     } catch (error) {
       if (error.response && error.response.status === 422) {
         const errors = error.response.data;
@@ -45,7 +55,6 @@ const SignUpPage = () => {
     }
     await register();
   };
-
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
@@ -179,13 +188,13 @@ const SignUpPage = () => {
                 Create an account
               </button>
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                Already have an account?{" "}
-                <a
-                  href="#"
-                  className="font-medium text-primary-600 hover:underline dark:text-primary-500"
+                Already have an account?
+                <Link
+                  className="ml-2 font-medium text-primary-600 hover:underline dark:text-primary-500"
+                  to="/signin"
                 >
                   Login here
-                </a>
+                </Link>
               </p>
             </form>
           </div>
@@ -195,4 +204,4 @@ const SignUpPage = () => {
   );
 };
 
-export default SignUpPage;
+export default SignInPage;
