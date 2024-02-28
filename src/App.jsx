@@ -1,7 +1,7 @@
 import { useContext, useEffect } from "react";
-import { AuthContext } from "./context/AuthContext";
+import { AuthContext } from "./context/AuthContext.jsx";
 import client from "./network/api.js";
-import Navbar from "./components/Navbar.jsx";
+import Sidebar from "./components/Sidebar.jsx";
 
 function App() {
   const { token, user, setUser } = useContext(AuthContext);
@@ -28,10 +28,12 @@ function App() {
 
   return (
     <>
-      <Navbar />
-      <h1 className="text-3xl font-bold uppercase text-center font-roboto">
-        {user.name}
-      </h1>
+      <Sidebar />
+      <div className="p-4 sm:ml-64">
+        <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
+          <h1>Dashboard</h1>
+        </div>
+      </div>
     </>
   );
 }
