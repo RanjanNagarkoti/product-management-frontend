@@ -11,6 +11,7 @@ import AuthContextProvider from "./context/AuthContext.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Categories from "./pages/Categories.jsx";
 import { QueryClient, QueryClientProvider } from "react-query";
+import Products from "./pages/Products.jsx";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,15 @@ const router = createBrowserRouter([
       <ProtectedRoute>
         {" "}
         <Categories />{" "}
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/products",
+    element: (
+      <ProtectedRoute>
+        {" "}
+        <Products />{" "}
       </ProtectedRoute>
     ),
   },

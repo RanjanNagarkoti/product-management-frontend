@@ -3,11 +3,11 @@ import Sidebar from "../components/Sidebar.jsx";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext.jsx";
 import client from "../network/api.js";
-import { useQuery, QueryClient, useMutation } from "react-query";
+import { useQuery, QueryClient } from "react-query";
 import Category from "../components/category/Category.jsx";
-import Buttons from "../components/pagination/Buttons.jsx";
 import { FaPlus } from "react-icons/fa";
 import Form from "../components/category/Form.jsx";
+import Pagination from "../components/pagination/Pagination.jsx";
 
 const Categories = () => {
   const queryClient = new QueryClient();
@@ -24,9 +24,8 @@ const Categories = () => {
     error,
     data: categories,
     isFetching,
-    isPreviousData,
   } = useQuery({
-    queryKey: ["categories", page],
+    queryKey: ["categories"],
     queryFn: () =>
       client.get(`/categories?page=${page}`, {
         headers: {
@@ -37,8 +36,12 @@ const Categories = () => {
   });
 
   useEffect(() => {
-    queryClient.invalidateQueries("categories");
+    queryClient.invalidateQueries(["categories"]);
   }, [page]);
+
+  const invalidateCategoryQueries = () => {
+    queryClient.invalidateQueries(["categories"]);
+  };
 
   if (isLoading || isFetching) {
     return (
@@ -66,8 +69,7 @@ const Categories = () => {
       <div className="p-4 sm:ml-64">
         <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
           <div className="relative overflow-x-auto">
-            {/* Table */}
-
+            {/* header */}
             <div className="w-full  mx-auto mb-4">
               <div className="relative overflow-hidden w-full bg-gray-800 sm:rounded-lg">
                 <div className="flex-row items-center justify-between p-4 space-y-3 sm:flex sm:space-y-0 sm:space-x-4">
@@ -89,11 +91,14 @@ const Categories = () => {
             </div>
 
             {/* new category form */}
-
             {toggleAddCategory && (
-              <Form setToggleAddCategory={setToggleAddCategory} />
+              <Form
+                setToggleAddCategory={setToggleAddCategory}
+                invalidateCategoryQueries={invalidateCategoryQueries}
+              />
             )}
 
+            {/* Table */}
             <table className="w-full text-sm text-left rtl:text-right text-gray-700 dark:text-gray-400 table-auto">
               <thead className="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
@@ -114,32 +119,17 @@ const Categories = () => {
               </thead>
               <tbody>
                 {categories.data.data.map((category) => (
-                  <Category category={category} key={category.id} />
+                  <Category
+                    category={category}
+                    key={category.id}
+                    invalidateCategoryQueries={invalidateCategoryQueries}
+                  />
                 ))}
               </tbody>
             </table>
 
             {/* pagination */}
-            <nav
-              className="flex items-center flex-column flex-wrap md:flex-row justify-between pt-4"
-              aria-label="Table navigation"
-            >
-              <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
-                Showing{" "}
-                <span className="font-semibold text-gray-900 dark:text-white">
-                  {`${categories.data.meta.from}-${categories.data.meta.to}`}
-                </span>{" "}
-                of{" "}
-                <span className="font-semibold text-gray-900 dark:text-white">
-                  {`${categories.data.meta.total}`}
-                </span>
-              </span>
-              <ul className="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
-                {categories.data.meta.links.map((link) => (
-                  <Buttons link={link} key={link.label} setPage={setPage} />
-                ))}
-              </ul>
-            </nav>
+            <Pagination meta={categories.data.meta} setPage={setPage} />
           </div>
         </div>
       </div>

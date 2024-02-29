@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext.jsx";
-import { useMutation } from "react-query";
+import { useMutation, QueryClient } from "react-query";
 import client from "../..//network/api.js";
 import toast from "react-hot-toast";
 
-const Form = ({ setToggleAddCategory }) => {
+const Form = ({ setToggleAddCategory, invalidateCategoryQueries }) => {
+  const queryClient = new QueryClient();
+
   const { token } = useContext(AuthContext);
 
   const [title, setTitle] = useState("");
@@ -13,12 +15,20 @@ const Form = ({ setToggleAddCategory }) => {
 
   const [validationError, setValidationError] = useState();
 
-  const mutation = useMutation((newCategory) =>
-    client.post("/categories", newCategory, {
-      headers: {
-        Authorization: token,
+  const mutation = useMutation(
+    (newCategory) =>
+      client.post("/categories", newCategory, {
+        headers: {
+          Authorization: token,
+        },
+      }),
+    {
+      onSuccess: () => {
+        invalidateCategoryQueries();
+        toast.success("Category Created");
+        setToggleAddCategory(false);
       },
-    })
+    }
   );
 
   const handleSubmit = async (event) => {
@@ -33,11 +43,6 @@ const Form = ({ setToggleAddCategory }) => {
   if (mutation.isError) {
     const { message, errors } = mutation.error.response.data;
     setValidationError(errors);
-  }
-
-  if (mutation.isSuccess) {
-    toast.success("Category Created");
-    setToggleAddCategory(false);
   }
 
   return (
